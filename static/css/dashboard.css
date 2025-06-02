@@ -1,0 +1,61 @@
+body {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    background: linear-gradient(to right, #1e3c72, #2a5298);
+    color: #ecf0f1;
+  }
+  header {
+    text-align: center;
+    padding: 1.5rem;
+    background: #1abc9c;
+    font-size: 2em;
+  }
+  .container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    padding: 2rem;
+  }
+  .panel {
+    background: #2c3e50;
+    border-radius: 10px;
+    padding: 1.5rem;
+  }
+  .panel h2 {
+    margin-top: 0;
+    color: #1abc9c;
+  }
+  .summary {
+    display: flex;
+    gap: 1rem;
+    justify-content: space-around;
+    margin-top: 1rem;
+  }
+  .summary div {
+    background: #34495e;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    flex: 1;
+  }
+  .summary h3 {
+    margin: 0;
+    font-size: 1.6em;
+    color: #1abc9c;
+  }
+  .nights-history {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1rem;
+  }
+  .night-box {
+    background: #34495e;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+  }
+  .night-box:hover {
+    background: #1abc9c;
+  }
+  

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Analyse du Sommeil</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background-color: #f8f8f8;
+      display: flex;
+      flex-direction: row;
+      gap: 30px;
+    }
+    .main {
+      flex: 3;
+    }
+    .side {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .section {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1, h2 {
+      color: #333;
+    }
+    #score {
+      font-size: 36px;
+      font-weight: bold;
+      color: #27ae60;
+    }
+    ul {
+      line-height: 1.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="main">
+    <div class="section">
+      <h1>Score de Sommeil</h1>
+      <div id="score">Calcul...</div>
+    </div>
+
+    <div class="section">
+      <h2>Hypnogramme (Phases de Sommeil)</h2>
+      <canvas id="hypnogramme"></canvas>
+    </div>
+
+    <div class="section">
+      <h2>Conseils Personnalisés</h2>
+      <ul id="conseils">
+        <li>Analyse en cours...</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="side">
+    <div class="section">
+      <h2>Température</h2>
+      <canvas id="chartTemp"></canvas>
+    </div>
+    <div class="section">
+      <h2>Humidité</h2>
+      <canvas id="chartHum"></canvas>
+    </div>
+    <div class="section">
+      <h2>Fréquence Cardiaque</h2>
+      <canvas id="chartCardio"></canvas>
+    </div>
+  </div>
+
+  <script>
+    fetch("/analyse_json")
+      .then(res => res.json())
+      .then(data => {
+        // Afficher le score
+        document.getElementById("score").innerText = data.score + "/100";
+
+        // Hypnogramme
+        const ctx = document.getElementById("hypnogramme").getContext("2d");
+        new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: data.hypnogramme.map(p => p.timestamp),
+            datasets: [{
+              label: "Phase de Sommeil",
+              data: data.hypnogramme.map(p => p.phase_numerique),
+              fill: false,
+              borderColor: "#2980b9",
+              tension: 0.1
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                ticks: {
+                  callback: function(value) {
+                    const phases = {0: "Absent", 1: "Agité", 2: "Léger", 3: "Profond"};
+                    return phases[value] || value;
+                  }
+                },
+                min: 0,
+                max: 3,
+                title: {
+                  display: true,
+                  text: "Phase"
+                }
+              }
+            }
+          }
+        });
+
+        // Conseils
+        const ul = document.getElementById("conseils");
+        ul.innerHTML = "";
+        if (data.conseils && data.conseils.length > 0) {
+          data.conseils.forEach(c => {
+            const li = document.createElement("li");
+            li.innerText = c;
+            ul.appendChild(li);
+          });
+        } else {
+          const li = document.createElement("li");
+          li.innerText = "Aucun conseil pour le moment.";
+          ul.appendChild(li);
+        }
+
+        // Température
+        new Chart(document.getElementById("chartTemp"), {
+          type: "line",
+          data: {
+            labels: data.hypnogramme.map(p => p.timestamp),
+            datasets: [{
+              label: "Température (ambiante)",
+              data: data.hypnogramme.map(p => p.temp_amb !== undefined ? p.temp_amb : null),
+              borderColor: "#e67e22",
+              fill: false
+            }]
+          }
+        });
+
+        // Humidité
+        new Chart(document.getElementById("chartHum"), {
+          type: "line",
+          data: {
+            labels: data.hypnogramme.map(p => p.timestamp),
+            datasets: [{
+              label: "Humidité (%)",
+              data: data.hypnogramme.map(p => p.humidity !== undefined ? p.humidity : null),
+              borderColor: "#3498db",
+              fill: false
+            }]
+          }
+        });
+
+        // Fréquence cardiaque (si disponible)
+        new Chart(document.getElementById("chartCardio"), {
+          type: "line",
+          data: {
+            labels: data.hypnogramme.map(p => p.timestamp),
+            datasets: [{
+              label: "BPM",
+              data: data.hypnogramme.map(p => p.bpm !== undefined ? p.bpm : null),
+              borderColor: "#e74c3c",
+              fill: false
+            }]
+          }
+        });
+
+      });
+  </script>
+
+<label>Heure :</label>
+<input type="number" id="hh" min="0" max="23" value="7">
+<label>Minute :</label>
+<input type="number" id="mm" min="0" max="59" value="0">
+<button onclick="envoyerAlarme()">Programmer réveil</button>
+
+<script>
+function envoyerAlarme() {
+  const hour = parseInt(document.getElementById("hh").value);
+  const minute = parseInt(document.getElementById("mm").value);
+
+  fetch("/send_alarm", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ hour, minute })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === "ok") {
+      alert("⏰ Réveil programmé !");
+    } else {
+      alert("Erreur : " + (data.error || data.response));
+    }
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Sommeil</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<header>Dashboard Sommeil</header>
+
+<div class="container">
+  <!-- Bloc des valeurs moyennes de la dernière nuit -->
+  <div class="panel">
+    <h2>Données moyennes dernière nuit</h2>
+    <div class="summary">
+      <div>
+        <h3>{{ moyenne_bpm }}</h3>
+        <p>BPM</p>
+      </div>
+      <div>
+        <h3>{{ moyenne_temp }} °C</h3>
+        <p>Température</p>
+      </div>
+      <div>
+        <h3>{{ moyenne_hum }} %</h3>
+        <p>Humidité</p>
+      </div>
+    </div>
+  </div>
+<div class="container">
+  <div class="panel">
+    <h2>Évolution sur une période</h2>
+    <label>Début : <input type="date" id="startDate"></label>
+    <label>Fin : <input type="date" id="endDate"></label>
+    <button onclick="updateGraph()">Mettre à jour</button>
+    <canvas id="trendChart" style="width: 600px; height: 300px;"></canvas>
+  </div>
+</div>
+
+<div class="panel" style="margin-top: 2rem;">
+  <h2>⏰ Programmer un Réveil</h2>
+  <label>Heure :</label>
+  <input type="number" id="hh" min="0" max="23" value="7">
+  <label>Minute :</label>
+  <input type="number" id="mm" min="0" max="59" value="0">
+  <button onclick="envoyerAlarme()">Programmer</button>
+</div>
+
+
+<!-- Historique de navigation vers les nuits -->
+<div class="panel" style="margin: 2rem;">
+  <h2>Historique des nuits</h2>
+  <div class="nights-history">
+    {% for nuit in range(1, 8) %}
+      <div class="night-box" onclick="location.href='/analyse/{{ nuit }}'">
+        Nuit {{ nuit }}
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Graphique dynamique -->
+<script>
+  const ctx = document.getElementById('trendChart').getContext('2d');
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: {{ jours | safe }},
+      datasets: [
+        {
+          label: 'Température (°C)',
+          data: {{ moyennes_temp | safe }},
+          borderColor: 'rgba(255, 99, 132, 1)',
+          backgroundColor: 'rgba(255, 99, 132, 0.2)',
+          fill: false,
+          tension: 0.3
+        },
+        {
+          label: 'BPM',
+          data: {{ moyennes_bpm | safe }},
+          borderColor: 'rgba(54, 162, 235, 1)',
+          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          fill: false,
+          tension: 0.3
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: true
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+
+  function envoyerAlarme() {
+    const hour = parseInt(document.getElementById("hh").value);
+    const minute = parseInt(document.getElementById("mm").value);
+
+    fetch("/send_alarm", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ hour, minute })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === "ok") {
+        alert("⏰ Réveil programmé pour " + hour + "h" + minute);
+      } else {
+        alert("❌ Erreur : " + (data.error || data.response));
+      }
+    })
+    .catch(err => {
+      console.error("Erreur réseau :", err);
+      alert("❌ Problème de connexion avec le serveur.");
+    });
+  }
+
+  function updateGraph() {
+  const start = document.getElementById("startDate").value;
+  const end = document.getElementById("endDate").value;
+  if (start && end) {
+    window.location.href = `/dashboard?start=${start}&end=${end}`;
+  } else {
+    alert("Veuillez choisir une plage de dates valide !");
+  }
+}
+
+
+</script>
+
+</body>
+</html>

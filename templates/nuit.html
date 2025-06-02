@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Analyse Nuit {{ nuit_num }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background: #1e272e;
+            font-family: 'Orbitron', sans-serif;
+            color: #f1f2f6;
+            padding: 2rem;
+        }
+        h1 {
+            color: #1abc9c;
+        }
+        canvas {
+            background: #2f3542;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .panel {
+            background: #2f3640;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+<h2>Température</h2>
+<canvas id="tempChart"></canvas>
+
+<h2>Humidité</h2>
+<canvas id="humidityChart"></canvas>
+
+<h2>Présence</h2>
+<canvas id="presenceChart"></canvas>
+
+<h2>Poids</h2>
+<canvas id="weightChart"></canvas>
+
+<h2>BPM</h2>
+<canvas id="bpmChart"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const heures = {{ heures|safe }};
+const temp = {{ temp|safe }};
+const humidity = {{ humidity|safe }};
+const presence = {{ presence|safe }};
+const weight = {{ weight|safe }};
+const bpm = {{ bpm|safe }};
+
+// Fonction générique pour créer un graphique
+function createChart(id, label, data, color) {
+    new Chart(document.getElementById(id), {
+        type: 'line',
+        data: {
+            labels: heures,
+            datasets: [{
+                label: label,
+                data: data,
+                borderColor: color,
+                fill: false
+            }]
+        }
+    });
+}
+
+createChart('tempChart', 'Température (°C)', temp, 'rgba(255,99,132,1)');
+createChart('humidityChart', 'Humidité (%)', humidity, 'rgba(54,162,235,1)');
+createChart('presenceChart', 'Présence (1/0)', presence, 'rgba(255,206,86,1)');
+createChart('weightChart', 'Poids (g)', weight, 'rgba(75,192,192,1)');
+createChart('bpmChart', 'BPM', bpm, 'rgba(153,102,255,1)');
+</script>

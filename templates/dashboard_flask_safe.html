@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Sommeil</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(to right, #1e3c72, #2a5298);
+            color: #ecf0f1;
+        }
+        header {
+            text-align: center;
+            padding: 1.5rem;
+            background: #1abc9c;
+            font-size: 2em;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            padding: 2rem;
+        }
+        .panel {
+            background: #2c3e50;
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+        .panel h2 {
+            margin-top: 0;
+            color: #1abc9c;
+        }
+        .summary {
+            display: flex;
+            gap: 1rem;
+            justify-content: space-around;
+            margin-top: 1rem;
+        }
+        .summary div {
+            background: #34495e;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            flex: 1;
+        }
+        .summary h3 {
+            margin: 0;
+            font-size: 1.6em;
+            color: #1abc9c;
+        }
+        .nights-history {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1rem;
+        }
+        .night-box {
+            background: #34495e;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .night-box:hover {
+            background: #1abc9c;
+        }
+    </style>
+</head>
+<body>
+
+<header>Dashboard Sommeil</header>
+
+<div class="container">
+    <div class="panel">
+        <h2>Dernière nuit</h2>
+        <div class="summary">
+            <div>
+                <h3>{{ moyenne_bpm }}</h3>
+                <p>BPM</p>
+            </div>
+            <div>
+                <h3>{{ moyenne_temp }} °C</h3>
+                <p>Température</p>
+            </div>
+            <div>
+                <h3>{{ moyenne_hum }} %</h3>
+                <p>Humidité</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>Évolution sur 7 nuits</h2>
+        <canvas id="trendChart" width="400" height="200"></canvas>
+    </div>
+</div>
+
+<div class="panel" style="margin: 2rem;">
+    <h2>Historique</h2>
+    <div class="nights-history">
+        {% for nuit in range(1, 8) %}
+        <div class="night-box" onclick="location.href='/analyse/nuit{{ nuit }}'">
+            Nuit {{ nuit }}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ jours|safe }},
+            datasets: [
+                {
+                    label: 'Température',
+                    data: {{ moyennes_temp|safe }},
+                    borderColor: '#f39c12',
+                    fill: false
+                },
+                {
+                    label: 'BPM',
+                    data: {{ moyennes_bpm|safe }},
+                    borderColor: '#1abc9c',
+                    fill: false
+                }
+            ]
+        }
+    });
+</script>
+
+</body>
+</html>
