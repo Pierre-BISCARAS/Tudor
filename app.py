@@ -24,7 +24,7 @@ def get_conn():
     return psycopg2.connect(
         dbname="sommeil",
         user="postgres",
-        password="pierrelilian",
+        password="necPA459",
         host="localhost",
         port="5432"
     )
@@ -59,11 +59,11 @@ def ttn_hook():
         cur.close()
         conn.close()
 
-        print(f"✔️ Mesure stockée : {timestamp} | Temp : {temp} | Hum : {hum}")
+        print(f"Mesure stockée : {timestamp} | Temp : {temp} | Hum : {hum}")
         return {"status": "ok"}
 
     except Exception as e:
-        print("❌ Erreur :", e)
+        print("Erreur :", e)
         return {"status": "error", "detail": str(e)}, 400
 
 from flask import render_template
@@ -145,7 +145,7 @@ def dashboard():
     start_date = request.args.get('start', (date.today() - timedelta(days=7)).isoformat())
     end_date = request.args.get('end', date.today().isoformat())
 
-    print(f"🔍 Plage de dates sélectionnée : {start_date} → {end_date}")
+    print(f"Plage de dates sélectionnée : {start_date} → {end_date}")
 
     # Requête dynamique sur la période choisie
     cur.execute("""
@@ -326,13 +326,13 @@ def analyse_json():
     # Conseils personnalisés simples
     conseils = []
     if len(temp_penalties) > 0:
-        conseils.append("🌡️ La température ambiante dépasse la zone idéale (18–23°C).")
+        conseils.append("La température ambiante dépasse la zone idéale (18–23°C).")
     if len(mouvements) > 5:
-        conseils.append("🛌 Sommeil agité détecté : essayez d’éviter les écrans avant de dormir.")
+        conseils.append("Sommeil agité détecté : essayez d’éviter les écrans avant de dormir.")
     if score < 70:
-        conseils.append("📉 Votre score de sommeil est faible. Essayez une routine plus relaxante.")
+        conseils.append("Votre score de sommeil est faible. Essayez une routine plus relaxante.")
     if not conseils:
-        conseils.append("💤 Très bon sommeil, continuez comme ça !")
+        conseils.append("Très bon sommeil, continuez comme ça !")
 
     return {
         "score": score,

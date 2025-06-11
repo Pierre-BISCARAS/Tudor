@@ -78,7 +78,7 @@ void setup() {
   ttn.onMessage(message);
 
   startMillis = millis();
-  debugSerial.println("⏱️ Mode accéléré activé : 1 min simulée = 5s");
+  
 
   tone(BUZZER_PIN, 1500);
   delay(300);
@@ -89,17 +89,16 @@ void loop() {
   unsigned long now = millis();
   
 
-  // 🕒 Simulation du temps
   unsigned long elapsedMinutes = (now - startMillis) / 5000;
   int currentHour = (elapsedMinutes / 60) % 24;
   int currentMinute = elapsedMinutes % 60;
 
-  debugSerial.print("🕒 Heure simulée : ");
+  debugSerial.print("Heure simulée : ");
   debugSerial.print(currentHour);
   debugSerial.print("h");
   debugSerial.println(currentMinute);
 
-  debugSerial.print("⏰ Vérif alarme : ");
+  debugSerial.print("alarme : ");
   debugSerial.print(currentHour);
   debugSerial.print("h");
   debugSerial.print(currentMinute);
@@ -109,7 +108,7 @@ void loop() {
   debugSerial.println(wakeMinute);
 
   if (!alarmTriggered && currentHour == wakeHour && currentMinute == wakeMinute) {
-    debugSerial.println("🔔 ALARME : heure atteinte !");
+    debugSerial.println("ALARME : heure atteinte !");
     for (int i = 0; i < 5; i++) {
       tone(BUZZER_PIN, 1000);
       delay(300);
@@ -119,7 +118,7 @@ void loop() {
     alarmTriggered = true;
   }
 
-  // 💓 Mesure BPM
+  // BPM
   if (now - lastECGCheck >= 5) {
     lastECGCheck = now;
     int ecgValue = analogRead(ECG_PIN);
@@ -143,13 +142,13 @@ void loop() {
     }
   }
 
-  if (lastTemperature > 26) {
+  if (lastTemperature > 24) {
     digitalWrite(FAN, HIGH);
   }
   else {
    digitalWrite(FAN, LOW); 
   }
-  // 📤 Envoi TTN + collecte toutes les 10s
+  // Envoi TTN + collecte toutes les 10s
   if (now - lastTTNSend >= 10000) {
     lastTTNSend = now;
 
@@ -175,7 +174,7 @@ void loop() {
     payload[4] = (poids_encoded >> 8) & 0xFF;
     payload[5] = (uint8_t)bpmToSend;
 
-    debugSerial.print("📦 Temp: ");
+    debugSerial.print("Temp: ");
     debugSerial.print(lastTemperature);
     debugSerial.print(" °C | Hum: ");
     debugSerial.print(lastHumidity);
@@ -209,7 +208,7 @@ void message(const byte* payload, int length, int port) {
     wakeMinute = payload[1];
     alarmTriggered = false;
 
-    debugSerial.print("📩 Réveil reçu : ");
+    debugSerial.print("Réveil reçu : ");
     debugSerial.print(wakeHour);
     debugSerial.print("h");
     debugSerial.println(wakeMinute);

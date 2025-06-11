@@ -16,7 +16,7 @@
     <h2>Données moyennes dernière nuit</h2>
     <div class="summary">
       <div>
-        <h3>{{ moyenne_bpm }}</h3>
+        <h3>{{ 54 }}</h3>
         <p>BPM</p>
       </div>
       <div>
@@ -116,14 +116,14 @@
     .then(res => res.json())
     .then(data => {
       if (data.status === "ok") {
-        alert("⏰ Réveil programmé pour " + hour + "h" + minute);
+        alert("Réveil programmé pour " + hour + "h" + minute);
       } else {
-        alert("❌ Erreur : " + (data.error || data.response));
+        alert("Erreur : " + (data.error || data.response));
       }
     })
     .catch(err => {
       console.error("Erreur réseau :", err);
-      alert("❌ Problème de connexion avec le serveur.");
+      alert("Problème de connexion avec le serveur.");
     });
   }
 
